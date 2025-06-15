@@ -30,6 +30,8 @@ app.post('/api/webhook', async (req, res) => {
 
       const replyText = chatRes.data.choices[0].message.content;
 
+      console.log("🟩返信内容:", replyText);
+      
       await axios.post('https://api.line.me/v2/bot/message/reply', {
         replyToken,
         messages: [{ type: 'text', text: replyText }]
