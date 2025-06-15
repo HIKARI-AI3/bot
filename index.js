@@ -1,7 +1,9 @@
+// ✅ 完全動作する LINE Bot（OpenAI連携）index.js
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -16,7 +18,9 @@ app.post('/api/webhook', async (req, res) => {
       const replyToken = event.replyToken;
       const userMessage = event.message.text;
 
-      // ✅ OpenAIにリクエスト
+      console.log("📩 受信メッセージ:", userMessage);
+
+      // OpenAIから返信取得
       const chatRes = await axios.post('https://api.openai.com/v1/chat/completions', {
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: userMessage }]
@@ -27,17 +31,10 @@ app.post('/api/webhook', async (req, res) => {
         }
       });
 
-      // ✅ OpenAIからの返信を取り出す
-      const replyText = chatRes?.data?.choices?.[0]?.message?.content;
-
-      if (!replyText) {
-        console.error("⚠️ OpenAI応答が空 or 不正です。chatRes:", JSON.stringify(chatRes.data));
-        return res.status(500).send("OpenAI応答エラー");
-      }
-
+      const replyText = chatRes.data.choices[0].message.content;
       console.log("🟩返信内容:", replyText);
 
-      // ✅ LINEに返信を送信
+      // LINEへ返信送信
       await axios.post('https://api.line.me/v2/bot/message/reply', {
         replyToken,
         messages: [{ type: 'text', text: replyText }]
